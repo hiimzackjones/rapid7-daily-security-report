@@ -82,7 +82,8 @@
             "field_ids": [],
             "rrns_only": true,
             "aggregates": [],
-            "start_time": "{{[\"Cutoff 24h\"].[date]}}"
+            "start_time": "{{[\"Cutoff 24h\"].[date]}}",
+            "leql": ""
           }
         },
         "identifier": "search_alerts",
@@ -233,7 +234,7 @@
                 ],
                 "operator": "EQUALS",
                 "field_ids": [
-                  "responsibility"
+                  "alert.responsibility"
                 ]
               }
             ],
@@ -241,7 +242,8 @@
             "field_ids": [],
             "rrns_only": true,
             "aggregates": [],
-            "start_time": "{{[\"Cutoff 24h\"].[date]}}"
+            "start_time": "{{[\"Cutoff 24h\"].[date]}}",
+            "leql": ""
           }
         },
         "identifier": "search_alerts",
@@ -402,7 +404,7 @@
                 ],
                 "operator": "NOT_EQUALS",
                 "field_ids": [
-                  "priority"
+                  "alert.priority"
                 ]
               }
             ],
@@ -410,7 +412,8 @@
             "field_ids": [],
             "rrns_only": false,
             "aggregates": [],
-            "start_time": "{{[\"Cutoff 24h\"].[date]}}"
+            "start_time": "{{[\"Cutoff 24h\"].[date]}}",
+            "leql": ""
           }
         },
         "identifier": "search_alerts",
@@ -481,6 +484,20 @@
       }
     },
     {
+      "nodeId": "b8e663fc-5160-4692-b0b3-4b3c8a1d0d53",
+      "name": "Daily Security Report",
+      "description": "",
+      "type": "artifact",
+      "metadata": {
+        "parameters": {
+          "type": "markdown",
+          "input": {
+            "content": "# Daily Security Report - Example Corp\n\nGenerated {{[\"Now ET\"].[converted_date]}} (ET) | Sources: Rapid7 InsightIDR (MDR), Surface Command, SentinelOne\n\n---\n\n## Recently active endpoints\n\n{{#each [\"SC EPP Counts\"].[items]}}**{{this.epp_active_24h}}** of **{{this.epp_total}}** endpoints have communicated with SentinelOne in the last 24 hours.\n\n- Stopped reporting (7-15 days): **{{this.epp_attention_7_15d}}**\n- Missing telemetry for more than 15 days: **{{this.epp_stale_15d}}**\n- Endpoints with active threats: **{{this.epp_infected}}**\n- Running an outdated sensor version: **{{this.epp_outdated_agent}}**\n- Newly observed endpoints: **{{this.epp_new_24h}}**\n{{/each}}\n\n{{#if [\"SC EPP Attention\"].[items]}}\n\n### Endpoints missing telemetry (7-15 days)\n| Endpoint | Type | OS | Last active | Last user |\n|---|---|---|---|---|\n{{#each [\"SC EPP Attention\"].[items]}}| **{{this.name}}** | {{this.type}} | {{this.os}} | {{this.last_active}} | {{this.last_user}} |\n{{/each}}{{/if}}\n{{#if [\"SC EPP Stale\"].[items]}}\n\n### Endpoints missing telemetry for more than 15 days (up to 20 shown)\n| Endpoint | Type | OS | Last active | Last user |\n|---|---|---|---|---|\n{{#each [\"SC EPP Stale\"].[items]}}| **{{this.name}}** | {{this.type}} | {{this.os}} | {{this.last_active}} | {{this.last_user}} |\n{{/each}}{{/if}}\n\n---\n\n## Threats to your organization\n\nRapid7 reviewed **{{[\"Alerts All\"].[metadata].[total_items]}}** alerts in the last 24 hours. **{{[\"Alerts Notable\"].[metadata].[total_items]}}** were notable (above informational) and **{{[\"Alerts Customer\"].[metadata].[total_items]}}** required customer attention.\n\n**{{[\"Inv New\"].[metadata].[total_data]}}** new investigations were opened in the last 24 hours.\n\n{{#if [\"Inv Open\"].[metadata].[total_data]}}You currently have **{{[\"Inv Open\"].[metadata].[total_data]}}** open investigations that require attention.{{else}}No open threats require attention - great job!{{/if}}\n{{#if [\"Inv New\"].[investigations]}}\n\n### New investigations\n| Priority | Investigation | Status |\n|---|---|---|\n{{#each [\"Inv New\"].[investigations]}}| {{this.priority}} | [**{{this.title}}**](https://REGION.idr.insight.rapid7.com/op/YOUR_PRODUCT_TOKEN#/investigations/{{this.rrn}}) | {{this.status}} |\n{{/each}}{{/if}}\n{{#if [\"Alerts Notable\"].[alerts]}}\n\n### Notable alerts\n| Priority | Alert |\n|---|---|\n{{#each [\"Alerts Notable\"].[alerts]}}| {{this.priority}} | [{{this.title}}](https://REGION.idr.insight.rapid7.com/op/YOUR_PRODUCT_TOKEN#/alerts/{{this.rrn}}) |\n{{/each}}{{/if}}\n[Open investigations in InsightIDR](https://REGION.idr.insight.rapid7.com/op/YOUR_PRODUCT_TOKEN#/investigations)\n\n---\n\n## Exploitable vulnerabilities - CISA Known Exploited (KEV)\n\n{{#each [\"SC KEV Counts\"].[items]}}Your environment currently has **{{this.kev_count}}** vulnerabilities on CISA's Known Exploited Vulnerabilities list. **{{this.kev_with_fix}}** of them have a fix available today.\n{{/each}}\n\n### Top 10 by Rapid7 Active Risk\n| CVE | Severity | CVSS | Active Risk | Fix available |\n|---|---|---|---|---|\n{{#each [\"SC KEV Top\"].[items]}}| [**{{this.cve}}**](https://nvd.nist.gov/vuln/detail/{{this.cve}}) | {{this.severity}} | {{this.cvss}} | {{this.active_risk}} | {{#if this.fix_available}}Yes{{/if}} |\n{{/each}}\n\n---\n\n_Generated automatically from live Rapid7 platform data (InsightConnect)._\n"
+          }
+        }
+      }
+    },
+    {
       "nodeId": "fe0b77be-227d-4529-9cd1-14258892abec",
       "name": "Report HTML",
       "description": "",
@@ -489,7 +506,7 @@
         "parameters": {
           "input": {
             "markdown": "",
-            "markdown_string": "# Daily Security Report - Example Corp\n\nGenerated {{[\"c13b1d4f-c686-4097-a2dd-3aaf8aa58e52\"].[converted_date]}} (ET) | Sources: Rapid7 InsightIDR (MDR), Surface Command, SentinelOne\n\n---\n\n## Recently active endpoints\n\n{{#each [\"SC EPP Counts\"].[items]}}**{{this.epp_active_24h}}** of **{{this.epp_total}}** endpoints have communicated with SentinelOne in the last 24 hours.\n\n- Stopped reporting (7-15 days): **{{this.epp_attention_7_15d}}**\n- Missing telemetry for more than 15 days: **{{this.epp_stale_15d}}**\n- Endpoints with active threats: **{{this.epp_infected}}**\n- Running an outdated sensor version: **{{this.epp_outdated_agent}}**\n- Newly observed endpoints: **{{this.epp_new_24h}}**\n{{/each}}\n\n{{#if [\"SC EPP Attention\"].[items]}}\n\n### Endpoints missing telemetry (7-15 days)\n| Endpoint | Type | OS | Last active | Last user |\n|---|---|---|---|---|\n{{#each [\"SC EPP Attention\"].[items]}}| **{{this.name}}** | {{this.type}} | {{this.os}} | {{this.last_active}} | {{this.last_user}} |\n{{/each}}{{/if}}\n{{#if [\"SC EPP Stale\"].[items]}}\n\n### Endpoints missing telemetry for more than 15 days (up to 20 shown)\n| Endpoint | Type | OS | Last active | Last user |\n|---|---|---|---|---|\n{{#each [\"SC EPP Stale\"].[items]}}| **{{this.name}}** | {{this.type}} | {{this.os}} | {{this.last_active}} | {{this.last_user}} |\n{{/each}}{{/if}}\n\n---\n\n## Threats to your organization\n\nRapid7 reviewed **{{[\"Alerts All\"].[metadata].[total_items]}}** alerts in the last 24 hours. **{{[\"Alerts Notable\"].[metadata].[total_items]}}** were notable (above informational) and **{{[\"Alerts Customer\"].[metadata].[total_items]}}** required customer attention.\n\n**{{[\"Inv New\"].[metadata].[total_data]}}** new investigations were opened in the last 24 hours.\n\n{{#if [\"Inv Open\"].[metadata].[total_data]}}You currently have **{{[\"Inv Open\"].[metadata].[total_data]}}** open investigations that require attention.{{else}}No open threats require attention - great job!{{/if}}\n{{#if [\"Inv New\"].[investigations]}}\n\n### New investigations\n| Priority | Investigation | Status |\n|---|---|---|\n{{#each [\"Inv New\"].[investigations]}}| {{this.priority}} | [**{{this.title}}**](https://REGION.idr.insight.rapid7.com/op/YOUR_PRODUCT_TOKEN#/investigations/{{this.rrn}}) | {{this.status}} |\n{{/each}}{{/if}}\n{{#if [\"Alerts Notable\"].[alerts]}}\n\n### Notable alerts\n| Priority | Alert |\n|---|---|\n{{#each [\"Alerts Notable\"].[alerts]}}| {{this.priority}} | [{{this.title}}](https://REGION.idr.insight.rapid7.com/op/YOUR_PRODUCT_TOKEN#/alerts/{{this.rrn}}) |\n{{/each}}{{/if}}\n[Open investigations in InsightIDR](https://REGION.idr.insight.rapid7.com/op/YOUR_PRODUCT_TOKEN#/investigations)\n\n---\n\n## Exploitable vulnerabilities - CISA Known Exploited (KEV)\n\n{{#each [\"SC KEV Counts\"].[items]}}Your environment currently has **{{this.kev_count}}** vulnerabilities on CISA's Known Exploited Vulnerabilities list. **{{this.kev_with_fix}}** of them have a fix available today.\n{{/each}}\n\n### Top 10 by Rapid7 Active Risk\n| CVE | Severity | CVSS | Active Risk | Fix available |\n|---|---|---|---|---|\n{{#each [\"SC KEV Top\"].[items]}}| [**{{this.cve}}**](https://nvd.nist.gov/vuln/detail/{{this.cve}}) | {{this.severity}} | {{this.cvss}} | {{this.active_risk}} | {{#if this.fix_available}}Yes{{/if}} |\n{{/each}}\n\n---\n\n_Generated automatically from live Rapid7 platform data (InsightConnect)._\n"
+            "markdown_string": "# Daily Security Report - Example Corp\n\nGenerated {{[\"Now ET\"].[converted_date]}} (ET) | Sources: Rapid7 InsightIDR (MDR), Surface Command, SentinelOne\n\n---\n\n## Recently active endpoints\n\n{{#each [\"SC EPP Counts\"].[items]}}**{{this.epp_active_24h}}** of **{{this.epp_total}}** endpoints have communicated with SentinelOne in the last 24 hours.\n\n- Stopped reporting (7-15 days): **{{this.epp_attention_7_15d}}**\n- Missing telemetry for more than 15 days: **{{this.epp_stale_15d}}**\n- Endpoints with active threats: **{{this.epp_infected}}**\n- Running an outdated sensor version: **{{this.epp_outdated_agent}}**\n- Newly observed endpoints: **{{this.epp_new_24h}}**\n{{/each}}\n\n{{#if [\"SC EPP Attention\"].[items]}}\n\n### Endpoints missing telemetry (7-15 days)\n| Endpoint | Type | OS | Last active | Last user |\n|---|---|---|---|---|\n{{#each [\"SC EPP Attention\"].[items]}}| **{{this.name}}** | {{this.type}} | {{this.os}} | {{this.last_active}} | {{this.last_user}} |\n{{/each}}{{/if}}\n{{#if [\"SC EPP Stale\"].[items]}}\n\n### Endpoints missing telemetry for more than 15 days (up to 20 shown)\n| Endpoint | Type | OS | Last active | Last user |\n|---|---|---|---|---|\n{{#each [\"SC EPP Stale\"].[items]}}| **{{this.name}}** | {{this.type}} | {{this.os}} | {{this.last_active}} | {{this.last_user}} |\n{{/each}}{{/if}}\n\n---\n\n## Threats to your organization\n\nRapid7 reviewed **{{[\"Alerts All\"].[metadata].[total_items]}}** alerts in the last 24 hours. **{{[\"Alerts Notable\"].[metadata].[total_items]}}** were notable (above informational) and **{{[\"Alerts Customer\"].[metadata].[total_items]}}** required customer attention.\n\n**{{[\"Inv New\"].[metadata].[total_data]}}** new investigations were opened in the last 24 hours.\n\n{{#if [\"Inv Open\"].[metadata].[total_data]}}You currently have **{{[\"Inv Open\"].[metadata].[total_data]}}** open investigations that require attention.{{else}}No open threats require attention - great job!{{/if}}\n{{#if [\"Inv New\"].[investigations]}}\n\n### New investigations\n| Priority | Investigation | Status |\n|---|---|---|\n{{#each [\"Inv New\"].[investigations]}}| {{this.priority}} | [**{{this.title}}**](https://REGION.idr.insight.rapid7.com/op/YOUR_PRODUCT_TOKEN#/investigations/{{this.rrn}}) | {{this.status}} |\n{{/each}}{{/if}}\n{{#if [\"Alerts Notable\"].[alerts]}}\n\n### Notable alerts\n| Priority | Alert |\n|---|---|\n{{#each [\"Alerts Notable\"].[alerts]}}| {{this.priority}} | [{{this.title}}](https://REGION.idr.insight.rapid7.com/op/YOUR_PRODUCT_TOKEN#/alerts/{{this.rrn}}) |\n{{/each}}{{/if}}\n[Open investigations in InsightIDR](https://REGION.idr.insight.rapid7.com/op/YOUR_PRODUCT_TOKEN#/investigations)\n\n---\n\n## Exploitable vulnerabilities - CISA Known Exploited (KEV)\n\n{{#each [\"SC KEV Counts\"].[items]}}Your environment currently has **{{this.kev_count}}** vulnerabilities on CISA's Known Exploited Vulnerabilities list. **{{this.kev_with_fix}}** of them have a fix available today.\n{{/each}}\n\n### Top 10 by Rapid7 Active Risk\n| CVE | Severity | CVSS | Active Risk | Fix available |\n|---|---|---|---|---|\n{{#each [\"SC KEV Top\"].[items]}}| [**{{this.cve}}**](https://nvd.nist.gov/vuln/detail/{{this.cve}}) | {{this.severity}} | {{this.cvss}} | {{this.active_risk}} | {{#if this.fix_available}}Yes{{/if}} |\n{{/each}}\n\n---\n\n_Generated automatically from live Rapid7 platform data (InsightConnect)._\n"
           }
         },
         "identifier": "markdown_to_html",
@@ -557,92 +574,100 @@
         "nodeId": "d2bf1280-97bd-4384-8fed-237233b38489"
       },
       {
+        "nodeId": "b8e663fc-5160-4692-b0b3-4b3c8a1d0d53"
+      },
+      {
         "nodeId": "fe0b77be-227d-4529-9cd1-14258892abec"
       }
     ],
     "edges": [
       {
-        "edgeId": "ca1f0ce4-92ea-48b3-982d-f9cbffa92eb6",
+        "edgeId": "f1264740-22cb-410c-b2f0-73363bcf3f6f",
         "fromNodeId": "0050e78a-fe8b-4eac-8dd3-af0fe4be67d5",
         "toNodeId": "032b54aa-0053-4e31-9586-65c8138e0b43"
       },
       {
-        "edgeId": "d8d7c243-8ecb-4500-8784-b98dce9b47b4",
+        "edgeId": "7871d6c3-03c3-4d9e-8ad5-eebb299e2ed4",
         "fromNodeId": "032b54aa-0053-4e31-9586-65c8138e0b43",
         "toNodeId": "0ae58ab8-ddbe-457d-9e8f-1ae3537ef539"
       },
       {
-        "edgeId": "d52419c2-007e-4ec8-b413-91fb3cee5296",
+        "edgeId": "46638f45-f794-4057-8a7b-7e21d487a965",
         "fromNodeId": "0ae58ab8-ddbe-457d-9e8f-1ae3537ef539",
         "toNodeId": "227291d5-c320-4912-b90d-e677bdbd39bb"
       },
       {
-        "edgeId": "93f7c4d2-4400-4767-a6e7-76ffdd7016af",
+        "edgeId": "7d26ccd4-3cb5-428d-a562-5340d890bc85",
         "fromNodeId": "227291d5-c320-4912-b90d-e677bdbd39bb",
         "toNodeId": "35cb6d73-7d26-489e-84d6-b2e62a5971ab"
       },
       {
-        "edgeId": "4d8b4853-4ced-49da-849c-c1751ac5340c",
+        "edgeId": "e8ff82bb-eae3-4c76-96fd-abbd19e591a4",
         "fromNodeId": "35cb6d73-7d26-489e-84d6-b2e62a5971ab",
         "toNodeId": "56ba1fe9-1860-48f4-920c-0514a827de87"
       },
       {
-        "edgeId": "2e44e5b6-d6df-4c3f-81ef-e451daa1da04",
+        "edgeId": "c202e28c-3989-4edb-8ae0-c28221aed889",
         "fromNodeId": "56ba1fe9-1860-48f4-920c-0514a827de87",
         "toNodeId": "66731b57-1cf9-4d3b-a45a-2fc810317709"
       },
       {
-        "edgeId": "a1ca4ed9-2b2f-408a-9888-b367823667ef",
+        "edgeId": "df0dc393-ac2c-4cf7-89dd-eb73095cac00",
         "fromNodeId": "66731b57-1cf9-4d3b-a45a-2fc810317709",
         "toNodeId": "6993e979-88b9-443a-97fe-2943535423a8"
       },
       {
-        "edgeId": "82123de1-3e9a-46fb-8575-82079fc2bf59",
+        "edgeId": "1798bafc-3d3f-4727-9540-88cdec178526",
         "fromNodeId": "6993e979-88b9-443a-97fe-2943535423a8",
         "toNodeId": "de8abbf2-26be-4d9d-b40c-c52b3bb93d23"
       },
       {
-        "edgeId": "4a29f779-a348-4ba4-a7e2-196d8eac10b2",
+        "edgeId": "20c92cd5-c8db-426b-8efd-214b43d7f20e",
         "fromNodeId": "de8abbf2-26be-4d9d-b40c-c52b3bb93d23",
         "toNodeId": "d1c9e289-919e-4fcd-959d-025e73acdd12"
       },
       {
-        "edgeId": "2e28d9f6-19d9-4585-8962-94a1c88c6395",
+        "edgeId": "656605d7-48a5-4906-9019-7cad311f2790",
         "fromNodeId": "d1c9e289-919e-4fcd-959d-025e73acdd12",
         "toNodeId": "6ed76672-27cb-4d7d-831b-73a964cd2cea"
       },
       {
-        "edgeId": "7ae94e24-b299-4d0c-84c5-7feda715fda4",
+        "edgeId": "f5182725-97fa-4b22-a125-d20f444a1113",
         "fromNodeId": "6ed76672-27cb-4d7d-831b-73a964cd2cea",
         "toNodeId": "83380fa5-1c91-4382-9ae8-1ef9a7acbf24"
       },
       {
-        "edgeId": "2ed97a62-a172-483a-8276-28ed89322895",
+        "edgeId": "4ca61047-c186-4915-9bb0-a98c6975ceb7",
         "fromNodeId": "83380fa5-1c91-4382-9ae8-1ef9a7acbf24",
         "toNodeId": "886946f5-bfbe-47ca-80f8-3c2902dbebfb"
       },
       {
-        "edgeId": "68b4ccfb-74c5-4eb3-a4d3-31b66d95781a",
+        "edgeId": "3fccee09-3d80-4c1c-a024-fd66616a41b6",
         "fromNodeId": "886946f5-bfbe-47ca-80f8-3c2902dbebfb",
         "toNodeId": "91a5f178-7653-41b9-8c62-61ee4c346fb9"
       },
       {
-        "edgeId": "5bff2925-b2c7-43c0-b08f-02e358ab020b",
+        "edgeId": "b89b2b3f-f20f-45c3-be6e-13356ee3bf58",
         "fromNodeId": "91a5f178-7653-41b9-8c62-61ee4c346fb9",
         "toNodeId": "af26d80a-9360-4802-ab47-465f51f86430"
       },
       {
-        "edgeId": "b0f7cace-6328-4003-aafc-92882c39a682",
+        "edgeId": "e1f3749b-6558-42a5-8e66-2eef6a907242",
         "fromNodeId": "af26d80a-9360-4802-ab47-465f51f86430",
         "toNodeId": "d2bf1280-97bd-4384-8fed-237233b38489"
       },
       {
-        "edgeId": "1e1a6286-c716-406b-813c-ec36670d716b",
+        "edgeId": "d64e4cc1-a600-452f-9636-c26c53801a17",
         "fromNodeId": "d2bf1280-97bd-4384-8fed-237233b38489",
+        "toNodeId": "b8e663fc-5160-4692-b0b3-4b3c8a1d0d53"
+      },
+      {
+        "edgeId": "b282b061-f4cc-48ff-bc95-a5c72bde3f50",
+        "fromNodeId": "b8e663fc-5160-4692-b0b3-4b3c8a1d0d53",
         "toNodeId": "fe0b77be-227d-4529-9cd1-14258892abec"
       },
       {
-        "edgeId": "7fb2e5f3-d30e-4cce-bd73-bb47acc1c9d1",
+        "edgeId": "20571982-473b-42c6-8247-ef096cca9b8e",
         "fromNodeId": "fe0b77be-227d-4529-9cd1-14258892abec"
       }
     ]

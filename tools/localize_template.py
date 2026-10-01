@@ -23,8 +23,13 @@ if len(sys.argv) != 2:
 
 snippet = json.load(open(sys.argv[1]))
 name2id = {s["name"]: s["nodeId"] for s in snippet["steps"]}
-template = next(s for s in snippet["steps"] if s["name"] == "Report HTML")
-text = template["metadata"]["parameters"]["input"]["markdown_string"]
+targets = []
+for s in snippet["steps"]:
+    if s["name"] == "Report HTML":
+        targets.append(("Report HTML -> markdown_string", s["metadata"]["parameters"]["input"]["markdown_string"]))
+    if s.get("type") == "artifact":
+        targets.append((f"artifact step '{s['name']}' -> content", s["metadata"]["parameters"]["input"]["content"]))
+text = None
 
 def bind(m):
     prefix, name = m.group(1) or "", m.group(2)
@@ -32,10 +37,12 @@ def bind(m):
         return "{{" + prefix + "[" + name2id[name] + "]"
     return m.group(0)  # already a nodeId or unknown -> leave untouched
 
-fixed = re.sub(r'\{\{(#each |#if )?\["([^"]+)"\]', bind, text)
-leftover = re.findall(r'\{\{(?:#each |#if )?\["([^"]+)"\]', fixed)
-print(fixed)
-if leftover:
-    sys.stderr.write(f"\nWARNING: unresolved step names: {sorted(set(leftover))}\n")
-else:
-    sys.stderr.write("\nAll step references bound to your org's nodeIds. Paste the output above into Report HTML -> markdown_string.\n")
+for label, text in targets:
+    fixed = re.sub(r'\{\{(#each |#if )?\["([^"]+)"\]', bind, text)
+    leftover = re.findall(r'\{\{(?:#each |#if )?\["([^"]+)"\]', fixed)
+    print(f"===== PASTE INTO: {label} =====")
+    print(fixed)
+    print()
+    if leftover:
+        sys.stderr.write(f"WARNING [{label}]: unresolved step names: {sorted(set(leftover))}\n")
+sys.stderr.write("\nDone. Paste each block into the step named in its header.\n")
