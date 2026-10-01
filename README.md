@@ -5,6 +5,12 @@ plugins — zero custom code**. Pulls live data from InsightIDR, Surface Command
 SentinelOne (via Surface Command's graph), renders it through one Handlebars/Markdown
 template, and outputs email-ready HTML.
 
+## What it looks like
+
+![Example daily report (fictional data)](docs/example-report.png)
+
+*Fictional example data — see [`docs/example-report.html`](docs/example-report.html) for the live HTML as the email client receives it.*
+
 ## What the report contains
 
 | Section | Source | Example |

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  body { margin:0; padding:0; background:#f4f5f7; }
+  .wrap { max-width:640px; margin:0 auto; padding:24px 16px; }
+  .card { background:#ffffff; border:1px solid #e3e6ea; border-radius:8px;
+          padding:32px 36px; font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+          color:#232a31; font-size:15px; line-height:1.55; }
+  .card h1 { font-size:21px; color:#1c2430; margin:0 0 4px 0; }
+  .card h1 + p { color:#6b7684; font-size:13px; margin-top:0; }
+  .card h2 { font-size:17px; color:#1c2430; border-bottom:2px solid #e8562d;
+             padding-bottom:6px; margin-top:30px; }
+  .card h3 { font-size:14px; color:#44505c; text-transform:uppercase;
+             letter-spacing:.04em; margin-bottom:6px; }
+  .card ul { padding-left:20px; margin-top:6px; }
+  .card li { margin:3px 0; }
+  .card a { color:#1668ad; text-decoration:none; }
+  .card hr { border:none; border-top:1px solid #e3e6ea; margin:26px 0; }
+  .card strong { color:#1c2430; }
+  .card table { border-collapse:collapse; width:100%; margin:10px 0 6px 0; font-size:13px; }
+  .card th { text-align:left; color:#44505c; font-weight:600; padding:6px 10px;
+             border-bottom:2px solid #d7dce1; white-space:nowrap; }
+  .card td { padding:6px 10px; border-bottom:1px solid #edf0f2; vertical-align:top; }
+  .card tr:nth-child(even) td { background:#fafbfc; }
+  .card col { width:auto !important; }
+  .card table { table-layout:auto; }
+  .foot { text-align:center; color:#9aa3ad; font-size:12px; padding:14px; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+<h1>Daily Security Report - Example Corp</h1>
+<p>Generated 01 Oct 2026 06:00:12 (ET) | Sources: Rapid7 InsightIDR (MDR), Surface Command, SentinelOne</p>
+<hr />
+<h2>Recently active endpoints</h2>
+<p><strong>437</strong> of <strong>465</strong> endpoints have communicated with SentinelOne in the last 24 hours.</p>
+<ul>
+<li>Stopped reporting (7-15 days): <strong>7</strong></li>
+<li>Missing telemetry for more than 15 days: <strong>12</strong></li>
+<li>Endpoints with active threats: <strong>0</strong></li>
+<li>Running an outdated sensor version: <strong>3</strong></li>
+<li>Newly observed endpoints: <strong>1</strong></li>
+</ul>
+<h3>Endpoints missing telemetry (7-15 days)</h3>
+<table><thead><tr><th>Endpoint</th><th>Type</th><th>OS</th><th>Last active</th><th>Last user</th></tr></thead><tbody><tr><td><strong>WKSTN-0142</strong></td><td>laptop</td><td>Windows 11 Pro</td><td>09/24/2026</td><td>jsmith</td></tr><tr><td><strong>FIN-LT-031</strong></td><td>laptop</td><td>Windows 11 Business</td><td>09/23/2026</td><td>mbrown</td></tr><tr><td><strong>ENG-MBP-07</strong></td><td>laptop</td><td>macOS</td><td>09/22/2026</td><td>asingh</td></tr><tr><td><strong>SRV-PRINT-02</strong></td><td>server</td><td>Windows Server 2019</td><td>09/21/2026</td><td></td></tr><tr><td><strong>WKSTN-0098</strong></td><td>desktop</td><td>Windows 10 Pro</td><td>09/20/2026</td><td>tlopez</td></tr><tr><td><strong>HR-LT-004</strong></td><td>laptop</td><td>Windows 11 Pro</td><td>09/18/2026</td><td>kchen</td></tr><tr><td><strong>MKT-MBP-12</strong></td><td>laptop</td><td>macOS</td><td>09/17/2026</td><td>dwhite</td></tr></tbody></table>
+<h3>Endpoints missing telemetry for more than 15 days (up to 20 shown)</h3>
+<table><thead><tr><th>Endpoint</th><th>Type</th><th>OS</th><th>Last active</th><th>Last user</th></tr></thead><tbody><tr><td><strong>WKSTN-0033</strong></td><td>desktop</td><td>Windows 10 Pro</td><td>09/14/2026</td><td>rgarcia</td></tr><tr><td><strong>OLD-LT-019</strong></td><td>laptop</td><td>Windows 10 Business</td><td>09/11/2026</td><td>pjones</td></tr><tr><td><strong>LAB-PC-06</strong></td><td>desktop</td><td>Windows 11 Pro</td><td>09/08/2026</td><td></td></tr><tr><td><strong>EXEC-MBP-02</strong></td><td>laptop</td><td>macOS</td><td>09/05/2026</td><td>snguyen</td></tr><tr><td><strong>WKSTN-0177</strong></td><td>desktop</td><td>Windows 11 Business</td><td>08/30/2026</td><td>bwilson</td></tr></tbody></table>
+<hr />
+<h2>Threats to your organization</h2>
+<p>Rapid7 reviewed <strong>212</strong> alerts in the last 24 hours. <strong>9</strong> were notable (above informational) and <strong>54</strong> required customer attention.</p>
+<p><strong>2</strong> new investigations were opened in the last 24 hours.</p>
+<p>You currently have <strong>5</strong> open investigations that require attention.</p>
+<h3>New investigations</h3>
+<table><thead><tr><th>Priority</th><th>Investigation</th><th>Status</th></tr></thead><tbody><tr><td>MEDIUM</td><td><a href="#"><strong>Endpoint Detection - Suspicious PowerShell Encoded Command</strong></a></td><td>OPEN</td></tr><tr><td>LOW</td><td><a href="#"><strong>User Behavior - Authentication From Unusual Location</strong></a></td><td>OPEN</td></tr></tbody></table>
+<h3>Notable alerts</h3>
+<table><thead><tr><th>Priority</th><th>Alert</th></tr></thead><tbody><tr><td>MEDIUM</td><td><a href="#">Endpoint Detection - Suspicious PowerShell Encoded Command</a></td></tr><tr><td>MEDIUM</td><td><a href="#">Lateral Movement - SMB Admin Share Access</a></td></tr><tr><td>LOW</td><td><a href="#">Brute Force - Failed Authentication Attempts Against Domain Account</a></td></tr><tr><td>LOW</td><td><a href="#">User Behavior - Account Password Reset - (Others)</a></td></tr><tr><td>LOW</td><td><a href="#">Non-Approved Application - File Transfer Tools</a></td></tr></tbody></table>
+<p><a href="#">Open investigations in InsightIDR</a></p>
+<hr />
+<h2>Exploitable vulnerabilities - CISA Known Exploited (KEV)</h2>
+<p>Your environment currently has <strong>42</strong> vulnerabilities on CISA's Known Exploited Vulnerabilities list. <strong>39</strong> of them have a fix available today.</p>
+<h3>Top 10 by Rapid7 Active Risk</h3>
+<table><thead><tr><th>CVE</th><th>Severity</th><th>CVSS</th><th>Active Risk</th><th>Fix available</th></tr></thead><tbody><tr><td><a href="https://nvd.nist.gov/vuln/detail/CVE-2021-44228"><strong>CVE-2021-44228</strong></a></td><td>Critical</td><td>10.0</td><td>1000</td><td>Yes</td></tr><tr><td><a href="https://nvd.nist.gov/vuln/detail/CVE-2024-3400"><strong>CVE-2024-3400</strong></a></td><td>Critical</td><td>10.0</td><td>1000</td><td>Yes</td></tr><tr><td><a href="https://nvd.nist.gov/vuln/detail/CVE-2023-4966"><strong>CVE-2023-4966</strong></a></td><td>Critical</td><td>9.4</td><td>1000</td><td>Yes</td></tr><tr><td><a href="https://nvd.nist.gov/vuln/detail/CVE-2021-34527"><strong>CVE-2021-34527</strong></a></td><td>High</td><td>8.8</td><td>991</td><td>Yes</td></tr><tr><td><a href="https://nvd.nist.gov/vuln/detail/CVE-2022-30190"><strong>CVE-2022-30190</strong></a></td><td>High</td><td>7.8</td><td>987</td><td>Yes</td></tr><tr><td><a href="https://nvd.nist.gov/vuln/detail/CVE-2020-1472"><strong>CVE-2020-1472</strong></a></td><td>Critical</td><td>9.8</td><td>980</td><td>Yes</td></tr><tr><td><a href="https://nvd.nist.gov/vuln/detail/CVE-2023-23397"><strong>CVE-2023-23397</strong></a></td><td>Critical</td><td>9.8</td><td>975</td><td>Yes</td></tr><tr><td><a href="https://nvd.nist.gov/vuln/detail/CVE-2021-26855"><strong>CVE-2021-26855</strong></a></td><td>Critical</td><td>9.8</td><td>970</td><td>Yes</td></tr><tr><td><a href="https://nvd.nist.gov/vuln/detail/CVE-2019-19781"><strong>CVE-2019-19781</strong></a></td><td>Critical</td><td>9.8</td><td>968</td><td>Yes</td></tr><tr><td><a href="https://nvd.nist.gov/vuln/detail/CVE-2017-0144"><strong>CVE-2017-0144</strong></a></td><td>High</td><td>8.1</td><td>954</td><td></td></tr></tbody></table>
+<hr />
+<p><em>Generated automatically from live Rapid7 platform data (InsightConnect). All data on this page is fictional example data.</em></p>
+    </div>
+    <div class="foot">Daily Security Report &middot; generated automatically by InsightConnect</div>
+  </div>
+</body>
+</html>
