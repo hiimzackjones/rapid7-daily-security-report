@@ -1,0 +1,650 @@
+{
+  "name": "Daily Security Report (Community Edition)",
+  "summary": "Daily security report: InsightIDR alerts/investigations, Surface Command EPP health, CISA KEV vulns -> email-ready HTML. Stock plugins only.",
+  "tags": [
+    "report",
+    "insightidr",
+    "surface-command"
+  ],
+  "inputSchema": {
+    "type": "object",
+    "properties": {}
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {}
+  },
+  "outputValues": null,
+  "notes": "See README: re-point connections after import; run tools/localize_template.py after first export to bind template refs to your org's nodeIds.",
+  "steps": [
+    {
+      "nodeId": "0050e78a-fe8b-4eac-8dd3-af0fe4be67d5",
+      "name": "SC KEV Top",
+      "description": "",
+      "type": "action",
+      "metadata": {
+        "parameters": {
+          "input": {
+            "cypher": "MATCH (v:Vulnerability)\nWHERE v.is_exploited = true\nRETURN v.name AS cve, v.severity AS severity, v.cvss AS cvss,\n       v.rapid7_active_risk_score AS active_risk, v.has_resolution AS fix_available\nORDER BY active_risk DESC\nLIMIT 10"
+          }
+        },
+        "identifier": "run_adhoc_query",
+        "continueOnFailure": false,
+        "isDisabled": false,
+        "plugin": {
+          "name": "rapid7_surface_command",
+          "vendor": "rapid7",
+          "version": "1.2.0"
+        },
+        "connectionId": "REPLACE-WITH-YOUR-SURFACE-COMMAND-CONNECTION",
+        "isCloud": true,
+        "connectionType": "CONNECTION"
+      }
+    },
+    {
+      "nodeId": "032b54aa-0053-4e31-9586-65c8138e0b43",
+      "name": "Now",
+      "description": "",
+      "type": "action",
+      "metadata": {
+        "parameters": {
+          "input": {
+            "format_string": "%d %b %Y %H:%M:%S",
+            "use_rfc3339_format": true
+          }
+        },
+        "identifier": "get_datetime",
+        "continueOnFailure": false,
+        "isDisabled": false,
+        "plugin": {
+          "name": "datetime",
+          "vendor": "rapid7",
+          "version": "3.0.7"
+        },
+        "orchestratorId": "REPLACE-WITH-YOUR-ORCHESTRATOR-ID",
+        "isCloud": false,
+        "connectionType": "ORCHESTRATOR"
+      }
+    },
+    {
+      "nodeId": "0ae58ab8-ddbe-457d-9e8f-1ae3537ef539",
+      "name": "Alerts All",
+      "description": "",
+      "type": "action",
+      "metadata": {
+        "parameters": {
+          "input": {
+            "size": 1,
+            "index": 0,
+            "sorts": [],
+            "terms": [],
+            "end_time": "{{[\"Now\"].[datetime]}}",
+            "field_ids": [],
+            "rrns_only": true,
+            "aggregates": [],
+            "start_time": "{{[\"Cutoff 24h\"].[date]}}"
+          }
+        },
+        "identifier": "search_alerts",
+        "continueOnFailure": false,
+        "isDisabled": false,
+        "plugin": {
+          "name": "rapid7_insightidr",
+          "vendor": "rapid7",
+          "version": "12.0.10"
+        },
+        "connectionId": "REPLACE-WITH-YOUR-INSIGHTIDR-CONNECTION",
+        "isCloud": true,
+        "connectionType": "CONNECTION"
+      }
+    },
+    {
+      "nodeId": "227291d5-c320-4912-b90d-e677bdbd39bb",
+      "name": "Cutoff 24h",
+      "description": "",
+      "type": "action",
+      "metadata": {
+        "parameters": {
+          "input": {
+            "days": 1,
+            "hours": 0,
+            "years": 0,
+            "months": 0,
+            "minutes": 0,
+            "seconds": 0,
+            "base_time": "{{[\"Now\"].[datetime]}}"
+          }
+        },
+        "identifier": "subtract_from_datetime",
+        "continueOnFailure": false,
+        "isDisabled": false,
+        "plugin": {
+          "name": "datetime",
+          "vendor": "rapid7",
+          "version": "3.0.7"
+        },
+        "orchestratorId": "REPLACE-WITH-YOUR-ORCHESTRATOR-ID",
+        "isCloud": false,
+        "connectionType": "ORCHESTRATOR"
+      }
+    },
+    {
+      "nodeId": "35cb6d73-7d26-489e-84d6-b2e62a5971ab",
+      "name": "Inv Open",
+      "description": "",
+      "type": "action",
+      "metadata": {
+        "parameters": {
+          "input": {
+            "size": 1,
+            "sort": [],
+            "index": 0,
+            "search": [
+              {
+                "field": "status",
+                "value": "OPEN",
+                "operator": "EQUALS"
+              }
+            ]
+          }
+        },
+        "identifier": "search_investigations",
+        "continueOnFailure": false,
+        "isDisabled": false,
+        "plugin": {
+          "name": "rapid7_insightidr",
+          "vendor": "rapid7",
+          "version": "12.0.10"
+        },
+        "connectionId": "REPLACE-WITH-YOUR-INSIGHTIDR-CONNECTION",
+        "isCloud": true,
+        "connectionType": "CONNECTION"
+      }
+    },
+    {
+      "nodeId": "56ba1fe9-1860-48f4-920c-0514a827de87",
+      "name": "SC KEV Counts",
+      "description": "",
+      "type": "action",
+      "metadata": {
+        "parameters": {
+          "input": {
+            "cypher": "MATCH (v:Vulnerability)\nWHERE v.is_exploited = true\nRETURN count(v) AS kev_count,\n       sum(CASE WHEN v.has_resolution = true THEN 1 ELSE 0 END) AS kev_with_fix"
+          }
+        },
+        "identifier": "run_adhoc_query",
+        "continueOnFailure": false,
+        "isDisabled": false,
+        "plugin": {
+          "name": "rapid7_surface_command",
+          "vendor": "rapid7",
+          "version": "1.2.0"
+        },
+        "connectionId": "REPLACE-WITH-YOUR-SURFACE-COMMAND-CONNECTION",
+        "isCloud": true,
+        "connectionType": "CONNECTION"
+      }
+    },
+    {
+      "nodeId": "66731b57-1cf9-4d3b-a45a-2fc810317709",
+      "name": "Cutoff 7d",
+      "description": "",
+      "type": "action",
+      "metadata": {
+        "parameters": {
+          "input": {
+            "days": 7,
+            "hours": 0,
+            "years": 0,
+            "months": 0,
+            "minutes": 0,
+            "seconds": 0,
+            "base_time": "{{[\"Now\"].[datetime]}}"
+          }
+        },
+        "identifier": "subtract_from_datetime",
+        "continueOnFailure": false,
+        "isDisabled": false,
+        "plugin": {
+          "name": "datetime",
+          "vendor": "rapid7",
+          "version": "3.0.7"
+        },
+        "orchestratorId": "REPLACE-WITH-YOUR-ORCHESTRATOR-ID",
+        "isCloud": false,
+        "connectionType": "ORCHESTRATOR"
+      }
+    },
+    {
+      "nodeId": "6993e979-88b9-443a-97fe-2943535423a8",
+      "name": "Alerts Customer",
+      "description": "",
+      "type": "action",
+      "metadata": {
+        "parameters": {
+          "input": {
+            "size": 1,
+            "index": 0,
+            "sorts": [],
+            "terms": [
+              {
+                "terms": [
+                  "CUSTOMER"
+                ],
+                "operator": "EQUALS",
+                "field_ids": [
+                  "responsibility"
+                ]
+              }
+            ],
+            "end_time": "{{[\"Now\"].[datetime]}}",
+            "field_ids": [],
+            "rrns_only": true,
+            "aggregates": [],
+            "start_time": "{{[\"Cutoff 24h\"].[date]}}"
+          }
+        },
+        "identifier": "search_alerts",
+        "continueOnFailure": false,
+        "isDisabled": false,
+        "plugin": {
+          "name": "rapid7_insightidr",
+          "vendor": "rapid7",
+          "version": "12.0.10"
+        },
+        "connectionId": "REPLACE-WITH-YOUR-INSIGHTIDR-CONNECTION",
+        "isCloud": true,
+        "connectionType": "CONNECTION"
+      }
+    },
+    {
+      "nodeId": "de8abbf2-26be-4d9d-b40c-c52b3bb93d23",
+      "name": "Now Friendly",
+      "description": "",
+      "type": "action",
+      "metadata": {
+        "parameters": {
+          "input": {
+            "format_string": "%d %b %Y %H:%M:%S",
+            "use_rfc3339_format": false
+          }
+        },
+        "identifier": "get_datetime",
+        "continueOnFailure": false,
+        "isDisabled": false,
+        "plugin": {
+          "name": "datetime",
+          "vendor": "rapid7",
+          "version": "3.0.7"
+        },
+        "orchestratorId": "REPLACE-WITH-YOUR-ORCHESTRATOR-ID",
+        "isCloud": false,
+        "connectionType": "ORCHESTRATOR"
+      }
+    },
+    {
+      "nodeId": "d1c9e289-919e-4fcd-959d-025e73acdd12",
+      "name": "Now ET",
+      "description": "",
+      "type": "action",
+      "metadata": {
+        "parameters": {
+          "input": {
+            "base_time": "{{[\"Now Friendly\"].[datetime]}}",
+            "timezone": "America/New_York"
+          }
+        },
+        "identifier": "to_localtime",
+        "continueOnFailure": false,
+        "isDisabled": false,
+        "plugin": {
+          "name": "datetime",
+          "vendor": "rapid7",
+          "version": "3.0.7"
+        },
+        "orchestratorId": "REPLACE-WITH-YOUR-ORCHESTRATOR-ID",
+        "isCloud": false,
+        "connectionType": "ORCHESTRATOR"
+      }
+    },
+    {
+      "nodeId": "6ed76672-27cb-4d7d-831b-73a964cd2cea",
+      "name": "Inv New",
+      "description": "",
+      "type": "action",
+      "metadata": {
+        "parameters": {
+          "input": {
+            "size": 25,
+            "sort": [],
+            "index": 0,
+            "search": [],
+            "end_time": "{{[\"Now\"].[datetime]}}",
+            "start_time": "{{[\"Cutoff 24h\"].[date]}}"
+          }
+        },
+        "identifier": "search_investigations",
+        "continueOnFailure": false,
+        "isDisabled": false,
+        "plugin": {
+          "name": "rapid7_insightidr",
+          "vendor": "rapid7",
+          "version": "12.0.10"
+        },
+        "connectionId": "REPLACE-WITH-YOUR-INSIGHTIDR-CONNECTION",
+        "isCloud": true,
+        "connectionType": "CONNECTION"
+      }
+    },
+    {
+      "nodeId": "83380fa5-1c91-4382-9ae8-1ef9a7acbf24",
+      "name": "SC EPP Attention",
+      "description": "",
+      "type": "action",
+      "metadata": {
+        "parameters": {
+          "input": {
+            "cypher": "MATCH (s:SentinelOneAgent)\nWHERE coalesce(s.isDecommissioned,false) = false\n  AND coalesce(s.isUninstalled,false) = false\n  AND coalesce(s.isPendingUninstall,false) = false\n  AND toString(s.lastActiveDate) <  '{{[\"Cutoff 7d\"].[date]}}'\n  AND toString(s.lastActiveDate) >= '{{[\"Cutoff 15d\"].[date]}}'\nRETURN s.computerName AS name, s.machineType AS type, s.osName AS os,\n       substring(toString(s.lastActiveDate), 5, 2) + '/' +\n       substring(toString(s.lastActiveDate), 8, 2) + '/' +\n       substring(toString(s.lastActiveDate), 0, 4) AS last_active,\n       s.lastLoggedInUserName AS last_user\nORDER BY toString(s.lastActiveDate) DESC"
+          }
+        },
+        "identifier": "run_adhoc_query",
+        "continueOnFailure": false,
+        "isDisabled": false,
+        "plugin": {
+          "name": "rapid7_surface_command",
+          "vendor": "rapid7",
+          "version": "1.2.0"
+        },
+        "connectionId": "REPLACE-WITH-YOUR-SURFACE-COMMAND-CONNECTION",
+        "isCloud": true,
+        "connectionType": "CONNECTION"
+      }
+    },
+    {
+      "nodeId": "886946f5-bfbe-47ca-80f8-3c2902dbebfb",
+      "name": "SC EPP Stale",
+      "description": "",
+      "type": "action",
+      "metadata": {
+        "parameters": {
+          "input": {
+            "cypher": "MATCH (s:SentinelOneAgent)\nWHERE coalesce(s.isDecommissioned,false) = false\n  AND coalesce(s.isUninstalled,false) = false\n  AND coalesce(s.isPendingUninstall,false) = false\n  AND toString(s.lastActiveDate) < '{{[\"Cutoff 15d\"].[date]}}'\nRETURN s.computerName AS name, s.machineType AS type, s.osName AS os,\n       substring(toString(s.lastActiveDate), 5, 2) + '/' +\n       substring(toString(s.lastActiveDate), 8, 2) + '/' +\n       substring(toString(s.lastActiveDate), 0, 4) AS last_active,\n       s.lastLoggedInUserName AS last_user\nORDER BY toString(s.lastActiveDate) DESC\nLIMIT 20"
+          }
+        },
+        "identifier": "run_adhoc_query",
+        "continueOnFailure": false,
+        "isDisabled": false,
+        "plugin": {
+          "name": "rapid7_surface_command",
+          "vendor": "rapid7",
+          "version": "1.2.0"
+        },
+        "connectionId": "REPLACE-WITH-YOUR-SURFACE-COMMAND-CONNECTION",
+        "isCloud": true,
+        "connectionType": "CONNECTION"
+      }
+    },
+    {
+      "nodeId": "91a5f178-7653-41b9-8c62-61ee4c346fb9",
+      "name": "Alerts Notable",
+      "description": "",
+      "type": "action",
+      "metadata": {
+        "parameters": {
+          "input": {
+            "size": 10,
+            "index": 0,
+            "sorts": [],
+            "terms": [
+              {
+                "terms": [
+                  "INFO"
+                ],
+                "operator": "NOT_EQUALS",
+                "field_ids": [
+                  "priority"
+                ]
+              }
+            ],
+            "end_time": "{{[\"Now\"].[datetime]}}",
+            "field_ids": [],
+            "rrns_only": false,
+            "aggregates": [],
+            "start_time": "{{[\"Cutoff 24h\"].[date]}}"
+          }
+        },
+        "identifier": "search_alerts",
+        "continueOnFailure": false,
+        "isDisabled": false,
+        "plugin": {
+          "name": "rapid7_insightidr",
+          "vendor": "rapid7",
+          "version": "12.0.10"
+        },
+        "connectionId": "REPLACE-WITH-YOUR-INSIGHTIDR-CONNECTION",
+        "isCloud": true,
+        "connectionType": "CONNECTION"
+      }
+    },
+    {
+      "nodeId": "af26d80a-9360-4802-ab47-465f51f86430",
+      "name": "SC EPP Counts",
+      "description": "",
+      "type": "action",
+      "metadata": {
+        "parameters": {
+          "input": {
+            "cypher": "MATCH (s:SentinelOneAgent)\nWHERE coalesce(s.isDecommissioned,false) = false\n  AND coalesce(s.isUninstalled,false) = false\n  AND coalesce(s.isPendingUninstall,false) = false\nRETURN\n  count(s) AS epp_total,\n  sum(CASE WHEN toString(s.lastActiveDate) >= '{{[\"Cutoff 24h\"].[date]}}' THEN 1 ELSE 0 END) AS epp_active_24h,\n  sum(CASE WHEN toString(s.lastActiveDate) < '{{[\"Cutoff 7d\"].[date]}}' AND toString(s.lastActiveDate) >= '{{[\"Cutoff 15d\"].[date]}}' THEN 1 ELSE 0 END) AS epp_attention_7_15d,\n  sum(CASE WHEN toString(s.lastActiveDate) < '{{[\"Cutoff 15d\"].[date]}}' THEN 1 ELSE 0 END) AS epp_stale_15d,\n  sum(CASE WHEN coalesce(s.infected,false) = true THEN 1 ELSE 0 END) AS epp_infected,\n  sum(CASE WHEN coalesce(s.isUpToDate,true) = false THEN 1 ELSE 0 END) AS epp_outdated_agent,\n  sum(CASE WHEN toString(s.registeredAt) >= '{{[\"Cutoff 24h\"].[date]}}' THEN 1 ELSE 0 END) AS epp_new_24h"
+          }
+        },
+        "identifier": "run_adhoc_query",
+        "continueOnFailure": false,
+        "isDisabled": false,
+        "plugin": {
+          "name": "rapid7_surface_command",
+          "vendor": "rapid7",
+          "version": "1.2.0"
+        },
+        "connectionId": "REPLACE-WITH-YOUR-SURFACE-COMMAND-CONNECTION",
+        "isCloud": true,
+        "connectionType": "CONNECTION"
+      }
+    },
+    {
+      "nodeId": "d2bf1280-97bd-4384-8fed-237233b38489",
+      "name": "Cutoff 15d",
+      "description": "",
+      "type": "action",
+      "metadata": {
+        "parameters": {
+          "input": {
+            "days": 15,
+            "hours": 0,
+            "years": 0,
+            "months": 0,
+            "minutes": 0,
+            "seconds": 0,
+            "base_time": "{{[\"Now\"].[datetime]}}"
+          }
+        },
+        "identifier": "subtract_from_datetime",
+        "continueOnFailure": false,
+        "isDisabled": false,
+        "plugin": {
+          "name": "datetime",
+          "vendor": "rapid7",
+          "version": "3.0.7"
+        },
+        "orchestratorId": "REPLACE-WITH-YOUR-ORCHESTRATOR-ID",
+        "isCloud": false,
+        "connectionType": "ORCHESTRATOR"
+      }
+    },
+    {
+      "nodeId": "fe0b77be-227d-4529-9cd1-14258892abec",
+      "name": "Report HTML",
+      "description": "",
+      "type": "action",
+      "metadata": {
+        "parameters": {
+          "input": {
+            "markdown": "",
+            "markdown_string": "# Daily Security Report - Example Corp\n\nGenerated {{[\"c13b1d4f-c686-4097-a2dd-3aaf8aa58e52\"].[converted_date]}} (ET) | Sources: Rapid7 InsightIDR (MDR), Surface Command, SentinelOne\n\n---\n\n## Recently active endpoints\n\n{{#each [\"SC EPP Counts\"].[items]}}**{{this.epp_active_24h}}** of **{{this.epp_total}}** endpoints have communicated with SentinelOne in the last 24 hours.\n\n- Stopped reporting (7-15 days): **{{this.epp_attention_7_15d}}**\n- Missing telemetry for more than 15 days: **{{this.epp_stale_15d}}**\n- Endpoints with active threats: **{{this.epp_infected}}**\n- Running an outdated sensor version: **{{this.epp_outdated_agent}}**\n- Newly observed endpoints: **{{this.epp_new_24h}}**\n{{/each}}\n\n{{#if [\"SC EPP Attention\"].[items]}}\n\n### Endpoints missing telemetry (7-15 days)\n| Endpoint | Type | OS | Last active | Last user |\n|---|---|---|---|---|\n{{#each [\"SC EPP Attention\"].[items]}}| **{{this.name}}** | {{this.type}} | {{this.os}} | {{this.last_active}} | {{this.last_user}} |\n{{/each}}{{/if}}\n{{#if [\"SC EPP Stale\"].[items]}}\n\n### Endpoints missing telemetry for more than 15 days (up to 20 shown)\n| Endpoint | Type | OS | Last active | Last user |\n|---|---|---|---|---|\n{{#each [\"SC EPP Stale\"].[items]}}| **{{this.name}}** | {{this.type}} | {{this.os}} | {{this.last_active}} | {{this.last_user}} |\n{{/each}}{{/if}}\n\n---\n\n## Threats to your organization\n\nRapid7 reviewed **{{[\"Alerts All\"].[metadata].[total_items]}}** alerts in the last 24 hours. **{{[\"Alerts Notable\"].[metadata].[total_items]}}** were notable (above informational) and **{{[\"Alerts Customer\"].[metadata].[total_items]}}** required customer attention.\n\n**{{[\"Inv New\"].[metadata].[total_data]}}** new investigations were opened in the last 24 hours.\n\n{{#if [\"Inv Open\"].[metadata].[total_data]}}You currently have **{{[\"Inv Open\"].[metadata].[total_data]}}** open investigations that require attention.{{else}}No open threats require attention - great job!{{/if}}\n{{#if [\"Inv New\"].[investigations]}}\n\n### New investigations\n| Priority | Investigation | Status |\n|---|---|---|\n{{#each [\"Inv New\"].[investigations]}}| {{this.priority}} | [**{{this.title}}**](https://REGION.idr.insight.rapid7.com/op/YOUR_PRODUCT_TOKEN#/investigations/{{this.rrn}}) | {{this.status}} |\n{{/each}}{{/if}}\n{{#if [\"Alerts Notable\"].[alerts]}}\n\n### Notable alerts\n| Priority | Alert |\n|---|---|\n{{#each [\"Alerts Notable\"].[alerts]}}| {{this.priority}} | [{{this.title}}](https://REGION.idr.insight.rapid7.com/op/YOUR_PRODUCT_TOKEN#/alerts/{{this.rrn}}) |\n{{/each}}{{/if}}\n[Open investigations in InsightIDR](https://REGION.idr.insight.rapid7.com/op/YOUR_PRODUCT_TOKEN#/investigations)\n\n---\n\n## Exploitable vulnerabilities - CISA Known Exploited (KEV)\n\n{{#each [\"SC KEV Counts\"].[items]}}Your environment currently has **{{this.kev_count}}** vulnerabilities on CISA's Known Exploited Vulnerabilities list. **{{this.kev_with_fix}}** of them have a fix available today.\n{{/each}}\n\n### Top 10 by Rapid7 Active Risk\n| CVE | Severity | CVSS | Active Risk | Fix available |\n|---|---|---|---|---|\n{{#each [\"SC KEV Top\"].[items]}}| [**{{this.cve}}**](https://nvd.nist.gov/vuln/detail/{{this.cve}}) | {{this.severity}} | {{this.cvss}} | {{this.active_risk}} | {{#if this.fix_available}}Yes{{/if}} |\n{{/each}}\n\n---\n\n_Generated automatically from live Rapid7 platform data (InsightConnect)._\n"
+          }
+        },
+        "identifier": "markdown_to_html",
+        "continueOnFailure": false,
+        "isDisabled": false,
+        "plugin": {
+          "name": "markdown",
+          "vendor": "rapid7",
+          "version": "4.0.3"
+        },
+        "orchestratorId": "REPLACE-WITH-YOUR-ORCHESTRATOR-ID",
+        "isCloud": false,
+        "connectionType": "ORCHESTRATOR"
+      }
+    }
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "nodeId": "0050e78a-fe8b-4eac-8dd3-af0fe4be67d5"
+      },
+      {
+        "nodeId": "032b54aa-0053-4e31-9586-65c8138e0b43"
+      },
+      {
+        "nodeId": "0ae58ab8-ddbe-457d-9e8f-1ae3537ef539"
+      },
+      {
+        "nodeId": "227291d5-c320-4912-b90d-e677bdbd39bb"
+      },
+      {
+        "nodeId": "35cb6d73-7d26-489e-84d6-b2e62a5971ab"
+      },
+      {
+        "nodeId": "56ba1fe9-1860-48f4-920c-0514a827de87"
+      },
+      {
+        "nodeId": "66731b57-1cf9-4d3b-a45a-2fc810317709"
+      },
+      {
+        "nodeId": "6993e979-88b9-443a-97fe-2943535423a8"
+      },
+      {
+        "nodeId": "de8abbf2-26be-4d9d-b40c-c52b3bb93d23"
+      },
+      {
+        "nodeId": "d1c9e289-919e-4fcd-959d-025e73acdd12"
+      },
+      {
+        "nodeId": "6ed76672-27cb-4d7d-831b-73a964cd2cea"
+      },
+      {
+        "nodeId": "83380fa5-1c91-4382-9ae8-1ef9a7acbf24"
+      },
+      {
+        "nodeId": "886946f5-bfbe-47ca-80f8-3c2902dbebfb"
+      },
+      {
+        "nodeId": "91a5f178-7653-41b9-8c62-61ee4c346fb9"
+      },
+      {
+        "nodeId": "af26d80a-9360-4802-ab47-465f51f86430"
+      },
+      {
+        "nodeId": "d2bf1280-97bd-4384-8fed-237233b38489"
+      },
+      {
+        "nodeId": "fe0b77be-227d-4529-9cd1-14258892abec"
+      }
+    ],
+    "edges": [
+      {
+        "edgeId": "ca1f0ce4-92ea-48b3-982d-f9cbffa92eb6",
+        "fromNodeId": "0050e78a-fe8b-4eac-8dd3-af0fe4be67d5",
+        "toNodeId": "032b54aa-0053-4e31-9586-65c8138e0b43"
+      },
+      {
+        "edgeId": "d8d7c243-8ecb-4500-8784-b98dce9b47b4",
+        "fromNodeId": "032b54aa-0053-4e31-9586-65c8138e0b43",
+        "toNodeId": "0ae58ab8-ddbe-457d-9e8f-1ae3537ef539"
+      },
+      {
+        "edgeId": "d52419c2-007e-4ec8-b413-91fb3cee5296",
+        "fromNodeId": "0ae58ab8-ddbe-457d-9e8f-1ae3537ef539",
+        "toNodeId": "227291d5-c320-4912-b90d-e677bdbd39bb"
+      },
+      {
+        "edgeId": "93f7c4d2-4400-4767-a6e7-76ffdd7016af",
+        "fromNodeId": "227291d5-c320-4912-b90d-e677bdbd39bb",
+        "toNodeId": "35cb6d73-7d26-489e-84d6-b2e62a5971ab"
+      },
+      {
+        "edgeId": "4d8b4853-4ced-49da-849c-c1751ac5340c",
+        "fromNodeId": "35cb6d73-7d26-489e-84d6-b2e62a5971ab",
+        "toNodeId": "56ba1fe9-1860-48f4-920c-0514a827de87"
+      },
+      {
+        "edgeId": "2e44e5b6-d6df-4c3f-81ef-e451daa1da04",
+        "fromNodeId": "56ba1fe9-1860-48f4-920c-0514a827de87",
+        "toNodeId": "66731b57-1cf9-4d3b-a45a-2fc810317709"
+      },
+      {
+        "edgeId": "a1ca4ed9-2b2f-408a-9888-b367823667ef",
+        "fromNodeId": "66731b57-1cf9-4d3b-a45a-2fc810317709",
+        "toNodeId": "6993e979-88b9-443a-97fe-2943535423a8"
+      },
+      {
+        "edgeId": "82123de1-3e9a-46fb-8575-82079fc2bf59",
+        "fromNodeId": "6993e979-88b9-443a-97fe-2943535423a8",
+        "toNodeId": "de8abbf2-26be-4d9d-b40c-c52b3bb93d23"
+      },
+      {
+        "edgeId": "4a29f779-a348-4ba4-a7e2-196d8eac10b2",
+        "fromNodeId": "de8abbf2-26be-4d9d-b40c-c52b3bb93d23",
+        "toNodeId": "d1c9e289-919e-4fcd-959d-025e73acdd12"
+      },
+      {
+        "edgeId": "2e28d9f6-19d9-4585-8962-94a1c88c6395",
+        "fromNodeId": "d1c9e289-919e-4fcd-959d-025e73acdd12",
+        "toNodeId": "6ed76672-27cb-4d7d-831b-73a964cd2cea"
+      },
+      {
+        "edgeId": "7ae94e24-b299-4d0c-84c5-7feda715fda4",
+        "fromNodeId": "6ed76672-27cb-4d7d-831b-73a964cd2cea",
+        "toNodeId": "83380fa5-1c91-4382-9ae8-1ef9a7acbf24"
+      },
+      {
+        "edgeId": "2ed97a62-a172-483a-8276-28ed89322895",
+        "fromNodeId": "83380fa5-1c91-4382-9ae8-1ef9a7acbf24",
+        "toNodeId": "886946f5-bfbe-47ca-80f8-3c2902dbebfb"
+      },
+      {
+        "edgeId": "68b4ccfb-74c5-4eb3-a4d3-31b66d95781a",
+        "fromNodeId": "886946f5-bfbe-47ca-80f8-3c2902dbebfb",
+        "toNodeId": "91a5f178-7653-41b9-8c62-61ee4c346fb9"
+      },
+      {
+        "edgeId": "5bff2925-b2c7-43c0-b08f-02e358ab020b",
+        "fromNodeId": "91a5f178-7653-41b9-8c62-61ee4c346fb9",
+        "toNodeId": "af26d80a-9360-4802-ab47-465f51f86430"
+      },
+      {
+        "edgeId": "b0f7cace-6328-4003-aafc-92882c39a682",
+        "fromNodeId": "af26d80a-9360-4802-ab47-465f51f86430",
+        "toNodeId": "d2bf1280-97bd-4384-8fed-237233b38489"
+      },
+      {
+        "edgeId": "1e1a6286-c716-406b-813c-ec36670d716b",
+        "fromNodeId": "d2bf1280-97bd-4384-8fed-237233b38489",
+        "toNodeId": "fe0b77be-227d-4529-9cd1-14258892abec"
+      },
+      {
+        "edgeId": "7fb2e5f3-d30e-4cce-bd73-bb47acc1c9d1",
+        "fromNodeId": "fe0b77be-227d-4529-9cd1-14258892abec"
+      }
+    ]
+  }
+}
